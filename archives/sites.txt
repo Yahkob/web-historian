@@ -1,1 +1,4 @@
 www.google.com
+www.youtube.com
+www.hulu.com
+www.hulu.ca

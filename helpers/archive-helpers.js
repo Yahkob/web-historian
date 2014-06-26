@@ -13,6 +13,7 @@ exports.paths = {
   'siteAssets' : path.join(__dirname, '../web/public'),
   'archivedSites' : path.join(__dirname, '../archives/sites'),
   'list' : path.join(__dirname, '../archives/sites.txt')
+  // 'loading': path.join(__dirname, '../web/public/loading.html')
 };
 
 // Used for stubbing paths for jasmine tests, do not modify
@@ -29,19 +30,48 @@ exports.readListOfUrls = function(){
 
 };
 
-exports.isUrlInList = function(req,res){
-  if(req.url === "/"){
-    console.log(req.url)
-    res.writeHead(200);
-    return req.url;
-  }
+exports.isUrlInList = function(targetUrl, callback){
+  fs.readFile(exports.paths.list, function (err, data) {
+    if (err){
+      throw err;
+    }
+    data = data.toString().split('\n');
+    console.log("DATA:", data, "TARGET URL:", targetUrl);
+    if (_.contains(data, targetUrl)) {
+      exports.isURLArchived(targetUrl, callback);
+    } else {
+      exports.addUrlToList(targetUrl, callback);
+    }
+  });
 
-  };
-
-exports.addUrlToList = function(){
+  /*if(url === targetUrl){
+    if(isURLArchived(targetUrl)){
+      serve
+    }
+  }*/
 };
 
-exports.isURLArchived = function(){
+exports.addUrlToList = function(url, callback){
+  url += "\n";
+  fs.appendFile(exports.paths.list, url, function (err) {
+    if (err) {
+      throw err;
+    } else {
+      callback(path.join(exports.paths.siteAssets, 'loading.html'));
+    }
+  });
+};
+
+exports.isURLArchived = function(targetUrl, callback){
+  console.log("path to isURLArchived works");
+  // if data sent it callback(data)
+  fs.readFile(path.join(exports.paths.archivedSites, targetUrl), function (err, data) {
+    if (err) {
+      callback(path.join(exports.paths.siteAssets, 'loading.html'));
+    } else {
+      callback(path.join(exports.paths.archivedSites, targetUrl));
+    }
+  });
 };
 
 exports.downloadUrls = function(){
