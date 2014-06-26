@@ -26,10 +26,17 @@ exports.initialize = function(pathsObj){
 // modularize your code. Keep it clean!
 
 exports.readListOfUrls = function(){
+
 };
 
-exports.isUrlInList = function(){
-};
+exports.isUrlInList = function(req,res){
+  if(req.url === "/"){
+    console.log(req.url)
+    res.writeHead(200);
+    return req.url;
+  }
+
+  };
 
 exports.addUrlToList = function(){
 };
