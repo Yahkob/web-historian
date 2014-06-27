@@ -13,7 +13,6 @@ exports.handleRequest = function (req, res) {
     else{
       console.log("PAth:", sitePath);
       helpers.serveAssets(res, sitePath);
-
     }
   } else if(req.method === "POST") {
     req.on('data',function(data){

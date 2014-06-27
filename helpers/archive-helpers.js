@@ -26,29 +26,26 @@ exports.initialize = function(pathsObj){
 // The following function names are provided to you to suggest how you might
 // modularize your code. Keep it clean!
 
-exports.readListOfUrls = function(){
-
+exports.readListOfUrls = function(callback){
+  fs.readFile(exports.paths.list, function(err, data){
+    if(err){
+      throw err;
+    }
+    else{
+      callback(data.toString().split('\n'));
+    }
+  });
 };
 
 exports.isUrlInList = function(targetUrl, callback){
-  fs.readFile(exports.paths.list, function (err, data) {
-    if (err){
-      throw err;
-    }
-    data = data.toString().split('\n');
-    console.log("DATA:", data, "TARGET URL:", targetUrl);
+  exports.readListOfUrls(function (data) {
+    console.log(targetUrl, data);
     if (_.contains(data, targetUrl)) {
       exports.isURLArchived(targetUrl, callback);
     } else {
       exports.addUrlToList(targetUrl, callback);
     }
   });
-
-  /*if(url === targetUrl){
-    if(isURLArchived(targetUrl)){
-      serve
-    }
-  }*/
 };
 
 exports.addUrlToList = function(url, callback){
@@ -74,5 +71,34 @@ exports.isURLArchived = function(targetUrl, callback){
   });
 };
 
-exports.downloadUrls = function(){
+exports.downloadUrls = function(http){
+  exports.readListOfUrls(function (urls) {
+    for (var i = 0; i < urls.length; i++) {
+      console.log("connection to url", urls[i]);
+      var url = "http://"+urls[i];
+      console.log("URL", url);
+      http.get(url, function(res) {
+        var that = this;
+        var data = '';
+        res.on('data', function (chunk) {
+          data += chunk;
+        });
+        res.on('end', function () {
+          saveFile(data, that.toString());
+        })
+      }.bind(urls[i])).on('error', function (err) {
+        console.log('Error Message', err.message);
+      });
+    }
+  });
 };
+
+var saveFile = function (htmlData, fileName) {
+  fs.writeFile(path.join(exports.paths.archivedSites, fileName), htmlData,function(err){
+    if(err){
+      throw err;
+    }
+    console.log("CREATING FILE");
+  });
+};
+
